@@ -5,8 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js",
-    "vercel-build": "echo 'Skipping build step for backend'"
+    "dev": "nodemon server.js"
   },
   "keywords": ["task-manager", "express", "mongodb", "api"],
   "author": "Bajrang Wavare",
