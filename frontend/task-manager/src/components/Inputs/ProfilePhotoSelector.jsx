@@ -1,9 +1,12 @@
 import React, { useRef, useState, useEffect } from "react";
 import { LuUser, LuUpload, LuTrash } from "react-icons/lu";
+import uploadImage from "../utils/uploadImage";
 
-const ProfilePhotoSelector = ({ image, setImage }) => {
+const ProfilePhotoSelector = ({ image, setImage, uploadedUrl, setUploadedUrl }) => {
   const inputRef = useRef(null);
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (image) {
@@ -16,21 +19,34 @@ const ProfilePhotoSelector = ({ image, setImage }) => {
     }
   }, [image]);
 
-  const handleImageChange = (event) => {
+  const handleImageChange = async (event) => {
     const file = event.target.files[0];
-    if (file) setImage(file);
+    if (!file) return;
+
+    setImage(file);
+    setError("");
+    setLoading(true);
+
+    try {
+      const data = await uploadImage(file);
+      setUploadedUrl(data.imageUrl);
+    } catch (err) {
+      console.error("Upload failed:", err);
+      setError("Upload failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleRemoveImage = () => {
     setImage(null);
+    setUploadedUrl(null);
   };
 
-  const onChooseFile = () => {
-    inputRef.current.click();
-  };
+  const onChooseFile = () => inputRef.current.click();
 
   return (
-    <div className="flex justify-center mb-6">
+    <div className="flex flex-col items-center mb-6">
       <input
         type="file"
         accept="image/*"
@@ -39,7 +55,7 @@ const ProfilePhotoSelector = ({ image, setImage }) => {
         className="hidden"
       />
 
-      {!previewUrl ? (
+      {!previewUrl && !uploadedUrl ? (
         <div
           onClick={onChooseFile}
           className="w-20 h-20 flex items-center justify-center bg-blue-100/50 rounded-full relative cursor-pointer"
@@ -50,7 +66,7 @@ const ProfilePhotoSelector = ({ image, setImage }) => {
       ) : (
         <div className="relative">
           <img
-            src={previewUrl}
+            src={uploadedUrl || previewUrl}
             alt="profile"
             className="w-20 h-20 rounded-full object-cover"
           />
@@ -63,6 +79,9 @@ const ProfilePhotoSelector = ({ image, setImage }) => {
           </button>
         </div>
       )}
+
+      {loading && <p className="text-sm text-gray-600 mt-2">Uploading...</p>}
+      {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
     </div>
   );
 };
