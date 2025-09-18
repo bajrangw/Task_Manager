@@ -2,7 +2,7 @@
 
 // Use environment variable (set in Vercel or .env.local)
 // Example: VITE_BACKEND_URL=https://task-manager-api.vercel.app
-const API_BASE = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+const API_BASE = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
 
 export const API_PATHS = {
   AUTH: {
