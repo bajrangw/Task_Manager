@@ -11,12 +11,25 @@ const reportRoutes = require("./routes/reportRoutes");
 
 const app = express();
 
-// Middleware to handle CORS
+// ✅ Allowed origins for CORS
+const allowedOrigins = [
+  "http://localhost:5173", // Local Vite dev
+  process.env.CLIENT_URL,  // Vercel frontend (set this in env)
+].filter(Boolean); // remove undefined
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "*",
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true); // allow Postman/cURL
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error("Not allowed by CORS"), false);
+      }
+    },
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
   })
 );
 
