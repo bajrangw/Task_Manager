@@ -1,6 +1,6 @@
 import React from "react";
-import UI_IMG from "../../assets/images/auth-image.webp";
-import BG_IMG from "../../assets/images/bg.jpg"; // Import background image
+import UI_IMG from "../../assets/images/auth-image.png";
+import BG_IMG from "../../assets/images/bg.jpg"; 
 
 const AuthLayout = ({ children }) => {
   return (
