@@ -1,24 +1,41 @@
 import React, { useRef, useState, useEffect } from "react";
 import { LuUser, LuUpload, LuTrash } from "react-icons/lu";
+import uploadImage from "../../utils/uploadImage";
 
 const ProfilePhotoSelector = ({ image, setImage }) => {
   const inputRef = useRef(null);
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     if (image) {
-      const objectUrl = URL.createObjectURL(image);
-      setPreviewUrl(objectUrl);
-
-      return () => URL.revokeObjectURL(objectUrl); // cleanup
+      // If image is a File object, show local preview
+      if (image instanceof File) {
+        const objectUrl = URL.createObjectURL(image);
+        setPreviewUrl(objectUrl);
+        return () => URL.revokeObjectURL(objectUrl);
+      } else {
+        // If image is a URL (string), show it directly
+        setPreviewUrl(image);
+      }
     } else {
       setPreviewUrl(null);
     }
   }, [image]);
 
-  const handleImageChange = (event) => {
+  const handleImageChange = async (event) => {
     const file = event.target.files[0];
-    if (file) setImage(file);
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      const { imageUrl } = await uploadImage(file); // Upload to backend
+      setImage(imageUrl); // Store HTTPS URL in state
+    } catch (err) {
+      console.error("Upload failed:", err);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleRemoveImage = () => {
@@ -52,15 +69,17 @@ const ProfilePhotoSelector = ({ image, setImage }) => {
           <img
             src={previewUrl}
             alt="profile"
-            className="w-20 h-20 rounded-full object-cover"
+            className={`w-20 h-20 rounded-full object-cover ${isUploading ? "opacity-50" : ""}`}
           />
-          <button
-            type="button"
-            className="w-8 h-8 flex items-center justify-center bg-red-500 text-white rounded-full absolute -bottom-1 -right-1 cursor-pointer"
-            onClick={handleRemoveImage}
-          >
-            <LuTrash />
-          </button>
+          {!isUploading && (
+            <button
+              type="button"
+              className="w-8 h-8 flex items-center justify-center bg-red-500 text-white rounded-full absolute -bottom-1 -right-1 cursor-pointer"
+              onClick={handleRemoveImage}
+            >
+              <LuTrash />
+            </button>
+          )}
         </div>
       )}
     </div>
