@@ -1,29 +1,24 @@
 import { API_PATHS } from "./apiPaths";
 import axiosInstance from "./axiosInstance";
 
-/**
- * Uploads an image to the backend.
- * @param {File} imageFile - The image file selected from input.
- * @returns {Promise<Object>} - Returns response data containing image URL.
- */
 const uploadImage = async (imageFile) => {
-  if (!imageFile) throw new Error("No file provided");
+    const formData = new FormData();
 
-  const formData = new FormData();
-  formData.append("image", imageFile);
+    // Append image file to from data
+    formData.append('image', imageFile);
 
-  try {
-    const response = await axiosInstance.post(API_PATHS.IMAGE.UPLOAD_IMAGE, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+    try {
+        const response =await axiosInstance.post(API_PATHS.IMAGE.UPLOAD_IMAGE, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data', // Set header for file upload
+            },
+        });
 
-    return response.data; // e.g., { imageUrl: "https://..." }
-  } catch (error) {
-    console.error("Error uploading the image:", error);
-    throw error;
-  }
+        return response.data; // Return response data
+    } catch (error) {
+        console.error('Error uploading the images:', error);
+        throw error; // Rethrow error for handling
+    }
 };
 
 export default uploadImage;

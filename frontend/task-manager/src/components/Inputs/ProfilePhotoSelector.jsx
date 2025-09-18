@@ -1,6 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
 import { LuUser, LuUpload, LuTrash } from "react-icons/lu";
-import uploadImage from "../../utils/uploadImage"; // ✅ fixed path
 
 const ProfilePhotoSelector = ({ image, setImage }) => {
   const inputRef = useRef(null);
