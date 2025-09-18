@@ -1,35 +1,38 @@
 require("dotenv").config();
 const mongoose = require("mongoose");
 const User = require("./models/User"); // adjust path if needed
-const Task = require("./models/Task"); // adjust path if task images exist
+const Task = require("./models/Task"); // adjust path if needed
 
 const MONGO_URI = process.env.MONGO_URI;
 const BACKEND_URL = process.env.BACKEND_URL || "https://task-manager-kappa-seven-78.vercel.app";
 
-mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log("✅ MongoDB connected"))
-  .catch(err => console.error(err));
+mongoose.connect(MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
-async function updateImages() {
+const updateUrls = async () => {
   try {
-    // Users profile images
-    await User.updateMany(
-      { profileImage: { $regex: "http://localhost:8000/uploads" } },
-      [{ $set: { profileImage: { $replaceOne: { input: "$profileImage", find: "http://localhost:8000", replacement: BACKEND_URL } } } }]
-    );
+    // Update user profile images
+    const users = await User.find({ profileImage: { $regex: "localhost:8000/uploads" } });
+    for (let user of users) {
+      user.profileImage = user.profileImage.replace("http://localhost:8000", BACKEND_URL);
+      await user.save();
+    }
 
-    // Task images
-    await Task.updateMany(
-      { imageUrl: { $regex: "http://localhost:8000/uploads" } },
-      [{ $set: { imageUrl: { $replaceOne: { input: "$imageUrl", find: "http://localhost:8000", replacement: BACKEND_URL } } } }]
-    );
+    // Update task images (if any)
+    const tasks = await Task.find({ imageUrl: { $regex: "localhost:8000/uploads" } });
+    for (let task of tasks) {
+      task.imageUrl = task.imageUrl.replace("http://localhost:8000", BACKEND_URL);
+      await task.save();
+    }
 
-    console.log("✅ All image URLs updated successfully");
+    console.log("✅ Image URLs updated successfully!");
     process.exit(0);
   } catch (err) {
     console.error("❌ Error updating image URLs:", err);
     process.exit(1);
   }
-}
+};
 
-updateImages();
+updateUrls();
